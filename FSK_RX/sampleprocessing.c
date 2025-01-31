@@ -26,8 +26,8 @@ void audioCallback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uin
 
     for (ma_uint32 i = 0; i < frameCount; i++) 
     {
-        output[i * 2] = input[i];               // Mikrofon auf Lautsprecher ausgeben
-        output[i * 2 + 1] = input[i];
+        //output[i * 2] = input[i];               // Mikrofon auf Lautsprecher ausgeben
+        //output[i * 2 + 1] = input[i];
         process_fsk_demodulation(input[i]);     // FSK-Demodulation
     }
 }

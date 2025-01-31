@@ -19,17 +19,19 @@
 #include "fsk_decode_ascii.h"
 #include "fsk_decode_ax25.h"
 
+#include "buffer.h"
+
 int main()
 {
     setlocale(LC_ALL, "de_DE.UTF-8");
 
     wprintf(L"                      RYTL TYTL                                       by dl8mcg 2025\n\n");
 
-    wprintf(L"Mit F1, F2, F3 oder F4 den Modus auszuwählen              Mit F8 das Programm beenden\n");
+    wprintf(L"Mit F1, F2, F3, F4 oder F5 den Modus auszuwählen              Mit F8 das Programm beenden\n");
 
     initialize_audiostream();
 
-    init_fsk_demod(FSK_RTTY_45_BAUD);
+    init_fsk_demod(FSK_RTTY_45_BAUD_170Hz);
 
     while (1)
     {
@@ -39,25 +41,25 @@ int main()
 
             if (key == 0 || key == 224)
             {
+
                 key = _getch(); // Zweites Zeichen lesen (Tastencode)
 
                 switch (key)
                 {
                 case 59: // F1
-                    init_fsk_demod(FSK_RTTY_45_BAUD);
-
+                    init_fsk_demod(FSK_RTTY_45_BAUD_170Hz);
                     break;
                 case 60: // F2
-                    init_fsk_demod(FSK_RTTY_50_BAUD);
-
+                    init_fsk_demod(FSK_RTTY_50_BAUD_85Hz);
                     break;
                 case 61: // F3
-                    init_fsk_demod(FSK_ASCII_300_BAUD);
-
+                    init_fsk_demod(FSK_RTTY_50_BAUD_450Hz);
                     break;
                 case 62: // F4
-                    init_fsk_demod(FSK_AX25_1200_BAUD);
-
+                    init_fsk_demod(FSK_ASCII_300_BAUD_850Hz);
+                    break;
+                case 63: // F5
+                    init_fsk_demod(FSK_AX25_1200_BAUD_1000Hz);
                     break;
                 case 66: // F8
                     wprintf(L"\n\nProgramm beendet.\n\n");
@@ -71,12 +73,12 @@ int main()
             }
         }
 
-        // Dekodierte Zeichen ausgeben
-        if (decready)
+        char value;
+        if (readbuf(&value))
         {
-            decready = false;
-            wprintf(L"%c", decoded_char); 
+            wprintf(L"%c", value);
         }
+
     }
 
 }

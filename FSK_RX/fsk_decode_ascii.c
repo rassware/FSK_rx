@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include "config.h"
+#include "buffer.h"
 
 static uint8_t rxbit;
 static uint8_t rxbyte = 0;              // shift-in register
@@ -63,8 +64,7 @@ static void state4()                    // Prüfung des zweiten Stopp-Bits
 {
     if (rxbit == 1)                     // Zweites Stopp-Bit korrekt
     {
-        decoded_char = bit_buffer;      // Dekodiertes Zeichen speichern 
-        decready = true;                // Signal für fertiges Zeichen
+        writebuf(bit_buffer);
     }
     smAscii = state1;                   // Zurücksetzen für nächstes Zeichen
 }

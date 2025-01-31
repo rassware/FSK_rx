@@ -139,6 +139,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="buffer.c" />
     <ClCompile Include="fsk_decode_ascii.c" />
     <ClCompile Include="fsk_decode_ax25.c" />
     <ClCompile Include="fsk_decode_rtty.c" />
@@ -147,6 +148,7 @@
     <ClCompile Include="sampleprocessing.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="buffer.h" />
     <ClInclude Include="config.h" />
     <ClInclude Include="fsk_decode_ascii.h" />
     <ClInclude Include="fsk_decode_ax25.h" />

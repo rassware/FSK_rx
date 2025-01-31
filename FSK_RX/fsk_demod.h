@@ -9,10 +9,11 @@
 
 typedef enum 
 {
-    FSK_RTTY_45_BAUD,
-    FSK_RTTY_50_BAUD,
-    FSK_ASCII_300_BAUD,
-    FSK_AX25_1200_BAUD
+    FSK_RTTY_45_BAUD_170Hz,
+    FSK_RTTY_50_BAUD_85Hz,
+    FSK_RTTY_50_BAUD_450Hz,
+    FSK_ASCII_300_BAUD_850Hz,
+    FSK_AX25_1200_BAUD_1000Hz
 } FskMode;
 
 extern volatile int demod_bit;

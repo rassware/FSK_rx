@@ -7,6 +7,8 @@
 #include <stdio.h>
 #include "fsk_demod.h"
 #include "config.h"
+#include "buffer.h"
+#include <windows.h>
 
 // state machine frame
 static void stateframe0();
@@ -27,9 +29,9 @@ static uint8_t bitcnt = 0;              // bit counter
 static uint8_t onecnt = 0;              // counter for one-bits
 static bool rxbit = false;              // received bit
 
-//static uint8_t callcnt = 0;
-
 static uint32_t rxword = 0;
+
+static int stopcnt = 0;
 
 
 void process_ax25(uint8_t bit)
@@ -71,6 +73,7 @@ void process_ax25(uint8_t bit)
 
 void stateframe0()
 {
+    //OutputDebugStringA("s0 ");
     /*if (rxbyte == 0x7E)                 // start flag detected
     {
         //printf("S");
@@ -91,6 +94,7 @@ void stateframe0()
 
 void stateframe1()
 {
+    //OutputDebugStringA("s1 ");
     bitcnt++;
 
     if (rxbyte == 0x7E)                 // an additional start flag detected
@@ -115,10 +119,12 @@ void stateframe1()
 
 void stateframe2()
 {
+    //OutputDebugStringA("s2 ");
     bitcnt++;
 
     if (rxbyte == 0x7E)                 // stop flag detected
     {
+        
         //printf("E");                  // End-Flag erkannt
         bitcnt = 0;                     // reset bit-counter
         smAX25 = stateframe1;           // back to state1
@@ -136,7 +142,9 @@ void stateframe2()
 
 void statecontent0()
 {
-    printf("%c", rxbyte >> 1);
+    //OutputDebugStringA("c0 ");
+    //printf("%c", rxbyte >> 1);
+    writebuf(rxbyte >> 1);
 
     if (rxbyte & 0x01)
     {
@@ -147,28 +155,30 @@ void statecontent0()
 
 void statecontent1()
 {
+    //OutputDebugStringA("c1 ");
     //printf("CTRL : %02X ", rxbyte);
 
     if (!(rxbyte & 0x01))
     {
-        printf("CTRL : I ");
+        //printf("CTRL : I ");
         smContent = statecontent2;          // I-frame
         return;
     }
     if ((rxbyte & 0x03) == 0x01)
     {
-        printf("CTRL : S ");
+        //printf("CTRL : S ");
         smContent = statecontent3;          // S-frame
         return;
     }
-    printf("CTRL : U ");
+    //printf("CTRL : U ");
     smContent = statecontent3;              // U-frame
     return;
 }
 
 void statecontent2()
 {
-    printf("PID : %02X ", rxbyte);
+    //OutputDebugStringA("c2 ");
+    //printf("PID : %02X ", rxbyte);
     smContent = statecontent3;
     return;
 }
@@ -176,7 +186,9 @@ void statecontent2()
 
 void statecontent3()
 {
-    printf("%c", rxbyte);
+    //OutputDebugStringA("c3 ");
+    //printf("%c", rxbyte);
+    writebuf(rxbyte);
     smContent = statecontent3;
     return;
 }

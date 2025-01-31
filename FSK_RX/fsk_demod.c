@@ -27,6 +27,9 @@ float half_bit_samples;
 volatile float lpf_alpha = 0;
 volatile float i_low = 0, q_low = 0;
 volatile float i_high = 0, q_high = 0;
+volatile float i_low_2 = 0.0f, q_low_2 = 0.0f, i_high_2 = 0.0f, q_high_2 = 0.0f;
+volatile float i_low_3 = 0.0f, q_low_3 = 0.0f, i_high_3 = 0.0f, q_high_3 = 0.0f;
+volatile float i_low_4 = 0.0f, q_low_4 = 0.0f, i_high_4 = 0.0f, q_high_4 = 0.0f;
 
 // Synchronization variables
 volatile float amplitude_low = 0;
@@ -35,7 +38,6 @@ volatile int bit_value = -1;
 volatile int previous_bit_value = -1;
 volatile float bit_timer = 0;
 volatile int demod_bit = 0;
-
 
 void process_fsk_demodulation(float sample)
 {
@@ -54,12 +56,39 @@ void process_fsk_demodulation(float sample)
 
     i_low += lpf_alpha * (i_sample_low - i_low);
     q_low += lpf_alpha * (q_sample_low - q_low);
+    i_low_2 += lpf_alpha * (i_low - i_low_2);
+    q_low_2 += lpf_alpha * (q_low - q_low_2);
+    i_low_3 += lpf_alpha * (i_low_2 - i_low_3);
+    q_low_3 += lpf_alpha * (q_low_2 - q_low_3);
+    i_low_4 += lpf_alpha * (i_low_3 - i_low_4);
+    q_low_4 += lpf_alpha * (q_low_3 - q_low_4);
     i_high += lpf_alpha * (i_sample_high - i_high);
     q_high += lpf_alpha * (q_sample_high - q_high);
+    i_high_2 += lpf_alpha * (i_high - i_high_2);
+    q_high_2 += lpf_alpha * (q_high - q_high_2);
+    i_high_3 += lpf_alpha * (i_high_2 - i_high_3);
+    q_high_3 += lpf_alpha * (q_high_2 - q_high_3);
+    i_high_4 += lpf_alpha * (i_high_3 - i_high_4);
+    q_high_4 += lpf_alpha * (q_high_3 - q_high_4);
 
     // Compute amplitudes for low- and high - tones
-    amplitude_low = sqrtf(i_low * i_low + q_low * q_low);
-    amplitude_high = sqrtf(i_high * i_high + q_high * q_high);
+    //amplitude_low = sqrtf(i_low * i_low + q_low * q_low);
+    //amplitude_high = sqrtf(i_high * i_high + q_high * q_high);
+
+    //amplitude_low = (i_low * i_low + q_low * q_low);
+    //amplitude_high = (i_high * i_high + q_high * q_high);
+
+    //amplitude_low = (i_low_2 * i_low_2 + q_low_2 * q_low_2);
+    //amplitude_high = (i_high_2 * i_high_2 + q_high_2 * q_high_2);
+
+    //amplitude_low = sqrtf(i_low_3 * i_low_3 + q_low_3 * q_low_3);
+    //amplitude_high = sqrtf(i_high_3 * i_high_3 + q_high_3 * q_high_3);
+
+    amplitude_low = sqrtf(i_low_4 * i_low_4 + q_low_4 * q_low_4);
+    amplitude_high = sqrtf(i_high_4 * i_high_4 + q_high_4 * q_high_4);
+
+    //amplitude_low = (i_low_4 * i_low_4 + q_low_4 * q_low_4);
+    //amplitude_high = (i_high_4 * i_high_4 + q_high_4 * q_high_4);
 
     // Detect bit based on amplitude comparison
     bit_value = (amplitude_high > amplitude_low) ? 1 : 0;
@@ -77,9 +106,7 @@ void process_fsk_demodulation(float sample)
     {
         // sample bit and provide
         demod_bit = bit_value;                      
-
         bit_timer = bit_duration_samples;
-
         smMode(demod_bit);
     }
 }
@@ -91,25 +118,34 @@ void init_fsk_demod(FskMode mode)
 
     switch (mode) 
     {
-    case FSK_RTTY_45_BAUD:
+    case FSK_RTTY_45_BAUD_170Hz:
         baud_rate = 45.454545f;
-        lpf_alpha = 0.04f;
+        lpf_alpha = 0.01f;
         flow = 2125.0f;
         fhigh = 2295.0f;
         smMode = process_rtty;
         wprintf(L"\n\nModus FSK_RTTY_45_BAUD  %g Hz / %g Hz\n\n", flow, fhigh);
         break;
 
-    case FSK_RTTY_50_BAUD:
+    case FSK_RTTY_50_BAUD_85Hz:
         baud_rate = 50.0f;
-        lpf_alpha = 0.04f;
+        lpf_alpha = 0.005f;
+        flow = 1957.5f;
+        fhigh = 2042.5f;
+        smMode = process_rtty;
+        wprintf(L"\n\nModus FSK_RTTY_50_BAUD  %g Hz / %g Hz\n\n", flow, fhigh);
+        break;
+
+    case FSK_RTTY_50_BAUD_450Hz:
+        baud_rate = 50.0f;
+        lpf_alpha = 0.005f;
         flow = 1775.0f;
         fhigh = 2225.0f;
         smMode = process_rtty;
         wprintf(L"\n\nModus FSK_RTTY_50_BAUD  %g Hz / %g Hz\n\n", flow, fhigh);
         break;
 
-    case FSK_ASCII_300_BAUD:
+    case FSK_ASCII_300_BAUD_850Hz:
         baud_rate = 300.0f;
         lpf_alpha = 0.04f;
         flow = 1275.0f;
@@ -118,9 +154,9 @@ void init_fsk_demod(FskMode mode)
         wprintf(L"\n\nModus FSK_ASCII_300_BAUD  %g Hz / %g Hz\n\n", flow, fhigh);
         break;
 
-    case FSK_AX25_1200_BAUD:
+    case FSK_AX25_1200_BAUD_1000Hz:
         baud_rate = 1200.0f;
-        lpf_alpha = 0.1f;
+        lpf_alpha = 0.1075f;
         flow = 1200.0f;
         fhigh = 2200.0f;
         smMode = process_ax25;

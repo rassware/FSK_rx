@@ -4,6 +4,8 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include "config.h"
+#include "buffer.h"
 
 // baudot - tables
 const char letters_table[32] =
@@ -26,8 +28,6 @@ enum RTTY_MODE { LETTERS, FIGURES };
 
 // some variables
 static enum RTTY_MODE current_mode = LETTERS;
-volatile char decoded_char = 0;
-volatile bool decready = false;
 
 static uint8_t rxbit;
 static uint8_t rxbyte = 0;                      // shift-in register
@@ -42,6 +42,8 @@ static void state4();
 
 static void (*smRtty)() = state1;              // Initialzustand
 
+const char* table = letters_table;
+
 void process_rtty(uint8_t bit)
 {
     rxbyte = (rxbyte << 1) | bit;               // shift in new bit to LSB
@@ -51,7 +53,8 @@ void process_rtty(uint8_t bit)
 
 static void state1()                            // Startbit-Suche
 {
-    if ((rxbyte & 0b111) == 0b110)              // Stopbit, Stopbit, Startbit erkannt
+    //if ((rxbyte & 0b111) == 0b110)            // Stopbit, Stopbit, Startbit erkannt
+    if ((rxbyte & 0b11) == 0b10)                // Stopbit, Startbit erkannt
     {
         bit_count = 0;
         bit_buffer = 0;
@@ -81,25 +84,27 @@ static void state3()                            // Prüfung des ersten Stopp-Bits
 }
 
 
-static void state4()                            // Prüfung des zweiten Stopp-Bits
+static void state4()                    // Prüfung des zweiten Stopp-Bits
 {
-    if (rxbit == 1)                             // Erstes Stopp-Bit korrekt
+    if (rxbit == 1)                     // Zweites Stopp-Bit korrekt
     {
-        // validate stop-bit (high)
-        const char* table = (current_mode == LETTERS) ? letters_table : figures_table;
-        if (bit_buffer == 0b11111)              // change to Letters
+        if ((bit_buffer & 0x1F) == 0b11111)
         {
-            current_mode = LETTERS;
+            table = letters_table;
+            smRtty = state1;
+            return;
         }
-        else if (bit_buffer == 0b11011)         // change to Figures
+
+        if ((bit_buffer & 0x1F) == 0b11011)
         {
-            current_mode = FIGURES;
+            table = figures_table;
+            smRtty = state1;
+            return;
         }
-        else
-        {
-            decoded_char = table[bit_buffer & 0x1F];  // 5 lsbs
-            decready = true;
-        }
+
+        //if( (bit_buffer & 0x1F) == 0b00100)  // space
+          //  table = letters_table;
+        writebuf(table[bit_buffer & 0x1F]);
     }
-    smRtty = state1;
+    smRtty = state1;                   // Zurücksetzen für nächstes Zeichen
 }
