@@ -11,6 +11,7 @@
 #include "fsk_decode_ascii.h"
 #include "fsk_decode_rtty.h"
 #include "fsk_decode_ax25.h"
+#include "fsk_decode_efr.h"
 
 static void (*smMode)(uint8_t) = process_ascii;      // Initialzustand
 
@@ -71,24 +72,8 @@ void process_fsk_demodulation(float sample)
     i_high_4 += lpf_alpha * (i_high_3 - i_high_4);
     q_high_4 += lpf_alpha * (q_high_3 - q_high_4);
 
-    // Compute amplitudes for low- and high - tones
-    //amplitude_low = sqrtf(i_low * i_low + q_low * q_low);
-    //amplitude_high = sqrtf(i_high * i_high + q_high * q_high);
-
-    //amplitude_low = (i_low * i_low + q_low * q_low);
-    //amplitude_high = (i_high * i_high + q_high * q_high);
-
-    //amplitude_low = (i_low_2 * i_low_2 + q_low_2 * q_low_2);
-    //amplitude_high = (i_high_2 * i_high_2 + q_high_2 * q_high_2);
-
-    //amplitude_low = sqrtf(i_low_3 * i_low_3 + q_low_3 * q_low_3);
-    //amplitude_high = sqrtf(i_high_3 * i_high_3 + q_high_3 * q_high_3);
-
     amplitude_low = sqrtf(i_low_4 * i_low_4 + q_low_4 * q_low_4);
     amplitude_high = sqrtf(i_high_4 * i_high_4 + q_high_4 * q_high_4);
-
-    //amplitude_low = (i_low_4 * i_low_4 + q_low_4 * q_low_4);
-    //amplitude_high = (i_high_4 * i_high_4 + q_high_4 * q_high_4);
 
     // Detect bit based on amplitude comparison
     bit_value = (amplitude_high > amplitude_low) ? 1 : 0;
@@ -120,7 +105,7 @@ void init_fsk_demod(FskMode mode)
     {
     case FSK_RTTY_45_BAUD_170Hz:
         baud_rate = 45.454545f;
-        lpf_alpha = 0.01f;
+        lpf_alpha = 0.04f;
         flow = 2125.0f;
         fhigh = 2295.0f;
         smMode = process_rtty;
@@ -129,20 +114,29 @@ void init_fsk_demod(FskMode mode)
 
     case FSK_RTTY_50_BAUD_85Hz:
         baud_rate = 50.0f;
-        lpf_alpha = 0.005f;
+        lpf_alpha = 0.04f;
         flow = 1957.5f;
         fhigh = 2042.5f;
         smMode = process_rtty;
-        wprintf(L"\n\nModus FSK_RTTY_50_BAUD  %g Hz / %g Hz\n\n", flow, fhigh);
+        wprintf(L"\n\nModus FSK_RTTY_50_BAUD  %g Hz / %g Hz   147,3 kHz\n\n", flow, fhigh);
         break;
 
     case FSK_RTTY_50_BAUD_450Hz:
         baud_rate = 50.0f;
-        lpf_alpha = 0.005f;
+        lpf_alpha = 0.04f;
         flow = 1775.0f;
         fhigh = 2225.0f;
         smMode = process_rtty;
-        wprintf(L"\n\nModus FSK_RTTY_50_BAUD  %g Hz / %g Hz\n\n", flow, fhigh);
+        wprintf(L"\n\nModus FSK_RTTY_50_BAUD  %g Hz / %g Hz   4583 kHz  7646 kHz  10100,8 kHz  11039 kHz  14467,3 kHz\n\n", flow, fhigh);
+        break;
+
+    case FSK_EFR_200_BAUD_340Hz:
+        baud_rate = 200.0f;
+        lpf_alpha = 0.04f;
+        flow = 1830.0f;
+        fhigh = 2170.0f;
+        smMode = process_efr;
+        wprintf(L"\n\nModus FSK_EFR_200_BAUD  %g Hz / %g Hz   129,1 kHz  139 kHz  135,6 kHz\n\n", flow, fhigh);
         break;
 
     case FSK_ASCII_300_BAUD_850Hz:

@@ -56,9 +56,12 @@ int main()
                     init_fsk_demod(FSK_RTTY_50_BAUD_450Hz);
                     break;
                 case 62: // F4
-                    init_fsk_demod(FSK_ASCII_300_BAUD_850Hz);
+                    init_fsk_demod(FSK_EFR_200_BAUD_340Hz);
                     break;
                 case 63: // F5
+                    init_fsk_demod(FSK_ASCII_300_BAUD_850Hz);
+                    break;
+                case 64: // F6
                     init_fsk_demod(FSK_AX25_1200_BAUD_1000Hz);
                     break;
                 case 66: // F8

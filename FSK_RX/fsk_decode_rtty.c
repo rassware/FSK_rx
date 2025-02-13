@@ -54,7 +54,7 @@ void process_rtty(uint8_t bit)
 static void state1()                            // Startbit-Suche
 {
     //if ((rxbyte & 0b111) == 0b110)            // Stopbit, Stopbit, Startbit erkannt
-    if ((rxbyte & 0b11) == 0b10)                // Stopbit, Startbit erkannt
+    if ((rxbyte & 0b111) == 0b110)                // Stopbit, Startbit erkannt
     {
         bit_count = 0;
         bit_buffer = 0;
