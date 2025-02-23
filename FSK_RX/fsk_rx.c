@@ -27,7 +27,7 @@ int main()
 
     wprintf(L"                      RYTL TYTL                                       by dl8mcg 2025\n\n");
 
-    wprintf(L"Mit F1, F2, F3, F4 oder F5 den Modus auszuwählen              Mit F8 das Programm beenden\n");
+    wprintf(L"Mit F1, F2, F3, F4, F5 oder F6 den Modus auszuwählen              Mit F8 das Programm beenden\n");
 
     initialize_audiostream();
 

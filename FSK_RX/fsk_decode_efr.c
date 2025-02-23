@@ -14,9 +14,17 @@ static uint8_t bit_buffer = 0;
 
 static uint8_t lenuserdata = 0;
 
+static uint8_t cntdata = 0;
+
+
 static uint8_t parity = 0;
 
 static uint8_t checksum = 0;
+
+volatile static bool okflag = false;
+
+static uint8_t databuf[7];
+static uint8_t cntbuf = 0;
 
 // Funktionszeiger für Zustandsmaschine Bytedetektion
 static void state1();
@@ -100,6 +108,7 @@ static void stateprot1(uint8_t resbyte)
     {
         wprintf(L"start : %02X \n", resbyte);
         checksum = 0;
+        okflag = false;
         smEfrprot = stateprot2;
     }
 }
@@ -151,29 +160,36 @@ static void stateprot7(uint8_t resbyte)
     if (lenuserdata > 3)
     {
         wprintf(L"data  : ");
+        cntdata = lenuserdata - 3;
+        cntbuf = 0;
         smEfrprot = stateprot8;
     }
     else
         smEfrprot = stateprot9;                 // <-- kommt nicht vor ?
 }
 
-static void stateprot8(uint8_t resbyte)
+static void stateprot8(uint8_t resbyte)         // Data-Field
 {
     checksum += resbyte;
     wprintf(L"%02X ", resbyte);
-    lenuserdata--;
-    if (lenuserdata <= 3)
+    if(cntbuf < 7)
+        databuf[cntbuf++] = resbyte;
+    cntdata--;
+    if (cntdata == 0)
     {
         wprintf(L"\n");
         smEfrprot = stateprot9;
     }
 }
 
-static void stateprot9(uint8_t resbyte)
+static void stateprot9(uint8_t resbyte)         // Checksum
 {
     wprintf(L"cs    : %02X  ", resbyte);
     if (checksum == resbyte)
+    {
         wprintf(L"ok\n");
+        okflag = true;
+    }
     else
         wprintf(L"error\n");
 
@@ -182,9 +198,17 @@ static void stateprot9(uint8_t resbyte)
 
 static void stateprot10(uint8_t resbyte)
 {
-    if(resbyte == 0x16) 
+    if (resbyte == 0x16)
+    {
         wprintf(L"stop  : %02X \n\n", resbyte);
+        if ((okflag == true) && (lenuserdata == 0x0a))
+        {
+            wprintf(L"date : %02d:%02d:%02d    time : %02d:%02d:%02d \n\n", databuf[4]&0x1F, databuf[5], databuf[6], databuf[3], databuf[2], databuf[1] / 4);
+        }
+    }
     else
+    {
         wprintf(L"error\n\n");
+    }
     smEfrprot = stateprot1;
 }
