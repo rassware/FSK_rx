@@ -13,6 +13,10 @@
 #include "fsk_decode_ax25.h"
 #include "fsk_decode_efr.h"
 
+#ifndef M_PI
+    #define M_PI 3.14159265358979323846
+#endif
+
 static void (*smMode)(uint8_t) = process_ascii;      // Initialzustand
 
 // NCO parameters

@@ -6,7 +6,7 @@
 #include "miniaudio.h"
 #include <stdio.h>
 #include <locale.h>
-#include <windows.h>
+#include <unistd.h>
 #include "config.h"
 #include "fsk_demod.h"
 
@@ -34,7 +34,7 @@ void audioCallback(ma_device* pDevice, void* pOutput, const void* pInput, ma_uin
 
 int initialize_audiostream()
 {
-    // Konfiguration des Audio-Ger‰ts
+    // Konfiguration des Audio-Ger√§ts
     deviceConfig = ma_device_config_init(ma_device_type_duplex);
     deviceConfig.sampleRate = (ma_uint32)SAMPLING_RATE; 
     deviceConfig.playback.format = ma_format_f32;           // Ausgabe: 32-Bit Float
@@ -42,13 +42,13 @@ int initialize_audiostream()
     deviceConfig.capture.format = ma_format_f32;            // Eingabe: 32-Bit Float
     deviceConfig.capture.channels = 1;                      // Mono-Eingabe
     deviceConfig.dataCallback = audioCallback;              // Callback-Funktion
-    deviceConfig.periodSizeInFrames = FRAMES_PER_BUFFER;    // Puffergrˆﬂe (frames)
+    deviceConfig.periodSizeInFrames = FRAMES_PER_BUFFER;    // Puffergr√∂√üe (frames)
 
     // Initialisierung Soundkarte
     result = ma_device_init(NULL, &deviceConfig, &device);
     if (result != MA_SUCCESS) 
     {
-        printf("Fehler beim Initialisieren des Ger‰ts: %d\n", result);
+        printf("Fehler beim Initialisieren des Ger√§ts: %d\n", result);
         return -1;
     }
 
@@ -56,7 +56,7 @@ int initialize_audiostream()
     result = ma_device_start(&device);
     if (result != MA_SUCCESS) 
     {
-        printf("Fehler beim Starten des Ger‰ts: %d\n", result);
+        printf("Fehler beim Starten des Ger√§ts: %d\n", result);
         ma_device_uninit(&device);
         return -1;
     }
