@@ -12,7 +12,7 @@ TARGET := $(BIN_DIR)/fsk_rx
 
 $(TARGET): $(OBJS)
 	@mkdir -p $(BIN_DIR)
-	$(CC) $(OBJS) -o $@
+	$(CC) $(OBJS) -o $@ -lm -ldl -lpthread
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.c
 	@mkdir -p $(OBJ_DIR)
